@@ -2,19 +2,19 @@
 const routePermissions = {
   '/dashboard': {
     requiredRoles: ['admin', 'user'],
-    requiredPermissions: []
+    requiredPermissions: ['read']
   },
   '/upload': {
     requiredRoles: ['admin'],
-    requiredPermissions: ['write']
+    requiredPermissions: ['read','write']
   },
   '/upload/chunk': {
     requiredRoles: ['admin'],
-    requiredPermissions: ['write']
+    requiredPermissions: ['read','write']
   },
   '/upload/complete': {
     requiredRoles: ['admin'],
-    requiredPermissions: ['write']
+    requiredPermissions: ['read','write']
   }
 };
 

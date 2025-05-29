@@ -32,7 +32,7 @@ const App = () => {
               </RouteGuard>
             }
           />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
       </Suspense>
     </AuthProvider>
