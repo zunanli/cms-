@@ -1,14 +1,18 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { useAuth } from '../context/AuthProvider';
 
-const RouteGuard = ({ children, requiredRoles = [], requiredPermissions = [] }) => {
+const RouteGuard = ({ children }) => {
   const location = useLocation();
   const { user, roles, permissions } = useSelector((state) => state.auth);
+  const { getRoutePermissions } = useAuth();
 
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
+
+  const { requiredRoles = [], requiredPermissions = [] } = getRoutePermissions(location.pathname);
 
   const hasRequiredRole = requiredRoles.length === 0 || 
     requiredRoles.some(role => roles.includes(role));

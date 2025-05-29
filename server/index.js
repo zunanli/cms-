@@ -70,6 +70,18 @@ const users = [
   }
 ];
 
+// Route permissions configuration
+const routePermissions = {
+  '/dashboard': {
+    requiredRoles: ['admin', 'user'],
+    requiredPermissions: []
+  },
+  '/upload': {
+    requiredRoles: ['admin'],
+    requiredPermissions: ['write']
+  }
+};
+
 // Middleware for JWT verification
 const verifyToken = async (ctx, next) => {
   try {
@@ -161,6 +173,16 @@ router.post('/api/auth/refresh', async (ctx) => {
   } catch (err) {
     ctx.status = 401;
     ctx.body = { error: 'Invalid refresh token' };
+  }
+});
+
+router.get('/api/auth/route-permissions', verifyToken, async (ctx) => {
+  try {
+    ctx.body = { routePermissions };
+  } catch (error) {
+    console.error('Error fetching route permissions:', error);
+    ctx.status = 500;
+    ctx.body = { error: 'Internal server error' };
   }
 });
 
