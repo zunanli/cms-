@@ -15,7 +15,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [routePermissions, setRoutePermissions] = useState({});
   const [loading, setLoading] = useState(true);
-  const { accessToken } = useSelector((state) => state.auth);
+  const { accessToken, roles = [], permissions = [] } = useSelector((state) => state.auth);
 
   useEffect(() => {
     const fetchRoutePermissions = async () => {
@@ -41,9 +41,27 @@ export const AuthProvider = ({ children }) => {
     fetchRoutePermissions();
   }, [accessToken]);
 
+  // 获取路由权限配置
   const getRoutePermissions = (pathname) => {
     return routePermissions[pathname] || { requiredRoles: [], requiredPermissions: [] };
   };
+
+  // 检查权限组合
+  const checkPermission = (requiredRoles = [], requiredPermissions = []) => {
+    const hasRequiredRole = requiredRoles.length === 0 || 
+      requiredRoles.some(role => roles.includes(role));
+
+    const hasRequiredPermission = requiredPermissions.length === 0 || 
+      requiredPermissions.some(permission => permissions.includes(permission));
+
+    return hasRequiredRole && hasRequiredPermission;
+  };
+
+  // 检查单个权限
+  const hasPermission = (permission) => permissions.includes(permission);
+
+  // 检查单个角色
+  const hasRole = (role) => roles.includes(role);
 
   if (!accessToken) {
     return children;
@@ -54,7 +72,14 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ getRoutePermissions }}>
+    <AuthContext.Provider value={{ 
+      getRoutePermissions,
+      checkPermission,
+      hasPermission,
+      hasRole,
+      roles,
+      permissions
+    }}>
       {children}
     </AuthContext.Provider>
   );

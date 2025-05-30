@@ -5,22 +5,17 @@ import { useAuth } from '../context/AuthProvider';
 
 const RouteGuard = ({ children }) => {
   const location = useLocation();
-  const { user, roles, permissions } = useSelector((state) => state.auth);
-  const { getRoutePermissions } = useAuth();
+  const { user } = useSelector((state) => state.auth);
+  const { getRoutePermissions, checkPermission } = useAuth();
 
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  const { requiredRoles = [], requiredPermissions = [] } = getRoutePermissions(location.pathname);
+  const { requiredRoles, requiredPermissions } = getRoutePermissions(location.pathname);
+  const hasAccess = checkPermission(requiredRoles, requiredPermissions);
 
-  const hasRequiredRole = requiredRoles.length === 0 || 
-    requiredRoles.some(role => roles.includes(role));
-
-  const hasRequiredPermission = requiredPermissions.length === 0 || 
-    requiredPermissions.some(permission => permissions.includes(permission));
-
-  if (!hasRequiredRole || !hasRequiredPermission) {
+  if (!hasAccess) {
     return <Navigate to="/unauthorized" replace />;
   }
 

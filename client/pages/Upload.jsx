@@ -1,15 +1,23 @@
 import React, { useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
+import { PermissionButton } from '../components/PermissionButton';
 
 const Upload = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState('');
+  const [file, setFile] = useState(null);
   const workerRef = useRef(null);
   const { accessToken } = useSelector(state => state.auth);
 
-  const handleFileSelect = async (e) => {
-    const file = e.target.files[0];
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
+    setUploadProgress(0);
+    setError('');
+  };
+
+  const handleUpload = async () => {
     if (!file) return;
 
     const uploadId = uuidv4();
@@ -31,6 +39,9 @@ const Upload = () => {
             break;
           case 'complete':
             setUploadProgress(100);
+            setFile(null); // Reset file after successful upload
+            break;
+          default:
             break;
         }
       };
@@ -46,13 +57,22 @@ const Upload = () => {
     }
   };
 
+  // Cleanup worker on unmount
+  React.useEffect(() => {
+    return () => {
+      if (workerRef.current) {
+        workerRef.current.terminate();
+      }
+    };
+  }, []);
+
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">File Upload</h1>
       <div className="bg-white shadow-md rounded p-6">
         <input
           type="file"
-          onChange={handleFileSelect}
+          onChange={handleFileChange}
           className="mb-4 block w-full text-sm text-gray-500
             file:mr-4 file:py-2 file:px-4
             file:rounded-md file:border-0
@@ -80,6 +100,29 @@ const Upload = () => {
             <p className="text-red-700 text-sm">{error}</p>
           </div>
         )}
+
+        <div className="mt-4 flex gap-4">
+          <PermissionButton
+            requiredRoles={['admin']}
+            requiredPermissions={['write']}
+            onClick={handleUpload}
+            disabled={!file || uploadProgress > 0}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 
+              disabled:bg-blue-300 disabled:cursor-not-allowed"
+          >
+            {uploadProgress > 0 ? 'Uploading...' : 'Upload File'}
+          </PermissionButton>
+
+          <PermissionButton
+            requiredRoles={['admin']}
+            requiredPermissions={['write', 'delete']}
+            onClick={() => {/* 删除逻辑 */}}
+            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 
+              disabled:bg-red-300 disabled:cursor-not-allowed"
+          >
+            Delete File
+          </PermissionButton>
+        </div>
       </div>
     </div>
   );
