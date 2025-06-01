@@ -9,7 +9,7 @@ const authRouter = require('./routes/auth');
 const uploadRouter = require('./routes/upload');
 
 // Import middleware
-const { checkPermissions } = require('./middleware/auth');
+const { verifyToken, checkPermissions } = require('./middleware/auth');
 
 const app = new Koa();
 
@@ -50,7 +50,10 @@ app.use(bodyParser({
   }
 }));
 
-// Add global permission checking middleware
+// Add token verification middleware
+app.use(verifyToken);
+
+// Add permission checking middleware
 app.use(checkPermissions);
 
 // Use routes
